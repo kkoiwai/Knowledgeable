@@ -1,0 +1,50 @@
+<%@val item: model.User %>
+<%@val s: skinny.Skinny %>
+
+<%-- Be aware of package imports.
+ 1. src/main/scala/templates/ScalatePackage.scala
+ 2. scalateTemplateConfig in project/Build.scala
+--%>
+
+<h3>${s.i18n.getOrKey("user.detail")}</h3>
+<hr/>
+#for (notice <- s.flash.notice)
+  <p class="alert alert-info">${notice}</p>
+#end
+<table class="table table-bordered">
+<tbody>
+  <tr>
+    <th>${s.i18n.getOrKey("user.id")}</th>
+    <td>${item.id}</td>
+  </tr>
+  <tr>
+    <th>${s.i18n.getOrKey("user.userid")}</th>
+    <td>${item.userid}</td>
+  </tr>
+  <tr>
+    <th>Name${//s.i18n.getOrKey("user.name")}</th>
+    <td>${item.name}</td>
+  </tr>
+  <tr>
+    <th>${s.i18n.getOrKey("user.email")}</th>
+    <td>${item.email}</td>
+  </tr>
+  <tr>
+    <th>${s.i18n.getOrKey("user.authority")}</th>
+    <td>${item.authority}</td>
+  </tr>
+  <tr>
+    <th>${s.i18n.getOrKey("user.disabled")}</th>
+    <td>${item.disabled}</td>
+  </tr>
+
+</tbody>
+</table>
+
+<hr/>
+<div class="form-actions">
+  <a class="btn btn-default" href="${s.url(Controllers.users.indexUrl)}">${s.i18n.getOrKey("backToList")}</a>
+  <a href="${s.url(Controllers.users.editUrl, "id" -> item.id)}" class="btn btn-info">${s.i18n.getOrKey("edit")}</a>
+  <a data-method="delete" data-confirm="${s.i18n.getOrKey("user.delete.confirm")}"
+    href="${s.url(Controllers.users.destroyUrl, "id" -> item.id)}" rel="nofollow" class="btn btn-danger">${s.i18n.getOrKey("delete")}</a>
+</div>
