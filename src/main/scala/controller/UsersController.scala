@@ -2,6 +2,7 @@ package controller
 
 import skinny._
 import skinny.validator._
+import scalikejdbc._
 import _root_.controller._
 import model.User
 
@@ -46,6 +47,21 @@ class UsersController extends SkinnyResource with ApplicationController {
     "authority" -> ParamType.Int,
     "disabled" -> ParamType.Boolean
   )
+
+  def showResources = {
+    if (enablePagination) {
+      val pageNo: Int = params.getAs[Int]("page").getOrElse(1)
+      val pageSize: Int = 20
+      val totalCount: Long = User.count()
+      val totalPages: Int = (totalCount / pageSize).toInt + (if (totalCount % pageSize == 0) 0 else 1)
+      set("items", User.findAllByWithPagination(sqls.eq(User.defaultAlias.field("disabled"), false),Pagination.page(pageNo).per(pageSize)))
+      set("totalPages" -> totalPages)
+    } else {
+      set("items", User.findAllBy(sqls.eq(User.defaultAlias.field("disabled"),false)))
+    }
+    render(s"/users/index")
+  }
+
 
   def updateResource(id: Long) = {
     debugLoggingParameters(updateForm, Some(id))

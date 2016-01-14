@@ -24,6 +24,8 @@ object Controllers {
     override val destroyUrl = delete("/users/:id") {
       params.getAs[Long]("id").map(id => destroyResource(id)).getOrElse(haltWithBody(404))
     }.as('destroy)
+
+    override val indexUrl = get("/users")(showResources).as('index)
   }
 
 
