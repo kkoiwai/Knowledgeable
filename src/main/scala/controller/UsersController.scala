@@ -19,7 +19,7 @@ class UsersController extends SkinnyResource with ApplicationController {
 
   override def createParams = Params(params)
   override def createForm = validation(createParams,
-    paramKey("userid") is required & maxLength(8),
+    paramKey("userid") is required & maxLength(8) & _root_.validator.unique("userid",ParamType.String,params.getAs("id"), model),
     paramKey("name") is required & maxLength(512),
     paramKey("email") is required & maxLength(512) & email,
     paramKey("authority") is required & numeric & intValue
@@ -34,7 +34,7 @@ class UsersController extends SkinnyResource with ApplicationController {
 
   override def updateParams = Params(params)
   override def updateForm = validation(updateParams,
-    paramKey("userid") is required & maxLength(8),
+    paramKey("userid") is required & maxLength(8) & _root_.validator.unique("userid",ParamType.String,params.getAs("id"), model),
     paramKey("name") is required & maxLength(512),
     paramKey("email") is required & maxLength(512) & email,
     paramKey("authority") is required & numeric & intValue
@@ -47,4 +47,39 @@ class UsersController extends SkinnyResource with ApplicationController {
     "disabled" -> ParamType.Boolean
   )
 
+  def updateResource(id: Long) = {
+    debugLoggingParameters(updateForm, Some(id))
+    User.findById(id).map { _ =>
+      if (updateForm.validate()) {
+        val parameters = updateParams.permit(updateFormStrongParameters: _*)
+        debugLoggingPermittedParameters(parameters, Some(id))
+
+        // disable old record
+        User.updateById(id).withAttributes('disabled -> true)
+
+        // create new record with updated attributes
+        val newid = {
+          User.createWithPermittedAttributes(parameters)
+        }
+        status = 200
+        flash += ("notice" -> createI18n().get("user.flash.updated").getOrElse("The user was updated."))
+        set("item", User.findById(newid).getOrElse(haltWithBody(404)))
+        redirect302(s"/users/${newid}")
+      } else {
+        status = 400
+        render("/users/edit")
+      }
+    } getOrElse haltWithBody(404)
+  }
+
+  def destroyResource(id: Long) = {
+    User.findById(id).map { _ =>
+
+      // disable old record
+      User.updateById(id).withAttributes('disabled -> true)
+
+      flash += ("notice" -> createI18n().get("user.flash.deleted").getOrElse("The user was deleted."))
+      status = 200
+    } getOrElse haltWithBody(404)
+  }
 }

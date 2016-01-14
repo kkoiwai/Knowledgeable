@@ -16,6 +16,15 @@ object Controllers {
   }
 
   object users extends _root_.controller.UsersController with Routes {
+
+    override val updateUrl = post("/users/:id") {
+      params.getAs[Long]("id").map(id => updateResource(id)).getOrElse(haltWithBody(404))
+    }.as('update)
+
+    override val destroyUrl = delete("/users/:id") {
+      params.getAs[Long]("id").map(id => destroyResource(id)).getOrElse(haltWithBody(404))
+    }.as('destroy)
   }
+
 
 }
