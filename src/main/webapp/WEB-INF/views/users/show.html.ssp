@@ -22,7 +22,7 @@
     <td>${item.userid}</td>
   </tr>
   <tr>
-    <th>Name${//s.i18n.getOrKey("user.name")}</th>
+    <th>${s.i18n.getOrKey("user.name")}</th>
     <td>${item.name}</td>
   </tr>
   <tr>
